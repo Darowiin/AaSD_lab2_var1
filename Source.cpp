@@ -5,29 +5,28 @@
 using namespace std;
 
 template <typename T>
-struct Node {
-    T data;
-    Node* next;
-    Node* prev;
-
-    Node(const T& value) : data(value), next(nullptr), prev(nullptr) {}
-};
-
-template <typename T>
 class DLinkedList {
 private:
-    Node<T>* _head;
-    Node<T>* _tail;
+    struct Node {
+        T data;
+        int index;
+        Node* next;
+        Node* prev;
+
+        Node(const T& value, const int& index) : data(value), index(index), next(nullptr), prev(nullptr) {}
+    };
+    Node* _head;
+    Node* _tail;
 
 public:
     DLinkedList() : _head(nullptr), _tail(nullptr) {}
 
     DLinkedList(const DLinkedList& other) : _head(nullptr), _tail(nullptr) {
-        Node<T>* current = other._head;
-        push_tail(current->data);
+        Node* current = other._head;
+        push_tail(current->data, current->index);
         current = current->next;
         while (current != other._tail->next) {
-            push_tail(current->data);
+            push_tail(current->data, current->index);
             current = current->next;
         }
     }
@@ -50,7 +49,7 @@ public:
         srand(time(0));
         for (int i = 0; i < size; ++i) {
             T value = generateRandom();
-            push_tail(value);
+            push_tail(value,i);
         }
     }
 
@@ -72,8 +71,8 @@ public:
         return *this;
     }
 
-    void push_tail(const T& value) {
-        Node<T>* new_node = new Node<T>(value);
+    void push_tail(const T& value, const int& index) {
+        Node* new_node = new Node(value,index);
         if (!_head) {
             _head = new_node;
             _head->next = _head;
@@ -90,16 +89,16 @@ public:
     }
 
     void push_tail(const DLinkedList& other) {
-        Node<T>* current = other._head;
+        Node* current = other._head;
         while (current != other._tail) {
-            push_tail(current->data);
+            push_tail(current->data, current->index);
             current = current->next;
         }
-        push_tail(other._tail->data);
+        push_tail(other._tail->data, other._tail->index);
     }
 
-    void push_head(const T& value) {
-        Node<T>* new_node = new Node<T>(value);
+    void push_head(const T& value, const int& index) {
+        Node* new_node = new Node(value,index);
         if (!_head) {
             _head = new_node;
             _tail = new_node;
@@ -114,17 +113,17 @@ public:
     }
 
     void push_head(const DLinkedList& other) {
-        Node<T>* current = other._tail;
+        Node* current = other._tail;
         while (current != other._head) {
-            push_head(current->data);
+            push_head(current->data, current->index);
             current = current->prev;
         }
-        push_head(other._head->data);
+        push_head(other._head->data, other._head->index);
     }
 
     void pop_head() {
         if (_head) {
-            Node<T>* temp = _head;
+            Node* temp = _head;
 
             if (_head == _tail) {
                 _head = nullptr;
@@ -142,7 +141,7 @@ public:
 
     void pop_tail() {
         if (_tail) {
-            Node<T>* temp = _tail;
+            Node* temp = _tail;
 
             if (_head == _tail) {
                 _head = nullptr;
@@ -159,8 +158,8 @@ public:
     }
 
     void delete_node(const T& value) {
-        Node<T>* current = _head;
-        Node<T>* start_node = _head;
+        Node* current = _head;
+        Node* start_node = _head;
         do {
             if (current->data == value) {
                 if (current == start_node) {
@@ -174,7 +173,7 @@ public:
                 }
                 current->prev->next = current->next;
                 current->next->prev = current->prev;
-                Node<T>* temp = current;
+                Node* temp = current;
                 current = current->next;
                 delete temp;
             }
@@ -185,7 +184,7 @@ public:
     }
 
     T operator[](int index) const {
-        Node<T>* tmp = _head;
+        Node* tmp = _head;
         int n = 0;
         while (n != index) {
             tmp = tmp->next;
@@ -195,7 +194,7 @@ public:
     }
 
     T& operator[](int index) {
-        Node<T>* tmp = _head;
+        Node* tmp = _head;
         int n = 0;
         while (n != index) {
             tmp = tmp->next;
@@ -203,9 +202,22 @@ public:
         }
         return tmp->data;
     }
-
+    size_t get_size() {
+        size_t size = 1;
+        _head = _head->next;
+        while (_head != _tail) {
+            ++size;
+            _head = _head->next;
+        }
+        return size;
+    }
+    int get_index(int index) {
+        Node* tmp = _head;
+        for (int i = 0; i < index; ++i, tmp = tmp->next);
+        return tmp->index;
+    }
     friend ostream& operator<<(ostream& os, const DLinkedList<T>& list) {
-        Node<T>* current = list._head;
+        Node* current = list._head;
         if (!current) {
             os << "Empty List";
         }
@@ -218,16 +230,25 @@ public:
         return os;
     }
 };
+template<typename T>
+T& polynomial(DLinkedList<T>& List, T x) {
+    T sum = 0;
+    List.delete_node(sum);
+    for (int i = 0; i < List.get_size(); ++i) {
+        sum += List[i] * pow(x, List.get_index(i));
+    }
+    return sum;
+}
 
 int main() {
     DLinkedList<int> list1;
-    list1.push_tail(1);
-    list1.push_tail(2);
-    list1.push_tail(2);
-    list1.push_tail(8);
-    list1.push_tail(2);
-    list1.push_head(4);
-    list1.push_head(5);
+    list1.push_tail(1,6);
+    list1.push_tail(2,5);
+    list1.push_tail(2,4);
+    list1.push_tail(8,3);
+    list1.push_tail(2,2);
+    list1.push_head(4,1);
+    list1.push_head(5,0);
     DLinkedList<int> list2 = list1;
     DLinkedList<int> list3(list1);
     list3 = list2;
@@ -269,13 +290,13 @@ int main() {
     cout << endl << endl << "floating point numbers:" << endl;
     //////////////////////////////////////////////////////////////////////
     DLinkedList<double> dlist1;
-    dlist1.push_tail(1.5);
-    dlist1.push_tail(2.2);
-    dlist1.push_tail(2.3);
-    dlist1.push_tail(8.4);
-    dlist1.push_tail(2.5);
-    dlist1.push_head(4.7);
-    dlist1.push_head(5.1);
+    dlist1.push_tail(1.5,6);
+    dlist1.push_tail(2.2,5);
+    dlist1.push_tail(2.3,4);
+    dlist1.push_tail(8.4,3);
+    dlist1.push_tail(2.5,2);
+    dlist1.push_head(4.7,1);
+    dlist1.push_head(5.1,0);
     DLinkedList<double> dlist2 = dlist1;
     DLinkedList<double> dlist3(dlist1);
     dlist3 = dlist2;
@@ -314,5 +335,8 @@ int main() {
     cout << "Second list: " << dlist2 << endl;
     dlist2.push_tail(dlist6);
     cout << "Second list with another in tail: " << dlist2 << endl << endl;
+
+    double result1 = polynomial(dlist6, 3.0);
+    cout << "polynomial another list with x=3: " << result1;
     return 0;
 }
