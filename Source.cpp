@@ -75,7 +75,12 @@ public:
     }
 
     void push_tail(const DLinkedList& other) {
-
+        Node<T>* current = other._head;
+        while (current != other._tail) {
+            push_tail(current->data);
+            current = current->next;
+        }
+        push_tail(other._tail->data);
     }
 
     void push_head(const T& value) {
@@ -94,7 +99,11 @@ public:
     }
 
     void push_head(const DLinkedList& other) {
-
+        Node<T>* current = other._head;
+        while (current != other._tail) {
+            push_head(current->data);
+            current = current->next;
+        }
     }
 
     void pop_head() {
@@ -160,11 +169,23 @@ public:
     }
 
     T operator[](int index) const {
-
+        Node<T>* tmp = _head;
+        int n = 0;
+        while (n != index) {
+            tmp = tmp->next;
+            n++;
+        }
+        return tmp->data;
     }
 
     T& operator[](int index) {
-
+        Node<T>* tmp = _head;
+        int n = 0;
+        while (n != index) {
+            tmp = tmp->next;
+            n++;
+        }
+        return tmp->data;
     }
 
     friend ostream& operator<<(ostream& os, const DLinkedList<T>& list) {
@@ -183,19 +204,14 @@ public:
 };
 
 int main() {
-    // Пример использования
     DLinkedList<int> list1;
-    //добавление в конец
     list1.push_tail(1);
     list1.push_tail(2);
-    list1.push_tail(8);
     list1.push_tail(2);
     list1.push_tail(8);
     list1.push_tail(2);
     list1.push_head(4);
-    list1.push_head(3);
     list1.push_head(5);
-    //Присваивание и копирование
     DLinkedList<int> list2 = list1;
     DLinkedList<int> list3(list1);
     list3 = list2;
@@ -203,27 +219,36 @@ int main() {
     cout << "First list: " << list1 << endl;
     cout << "Assignment: " << list2 << endl;
     cout << "Copying: " << list3 << endl;
-    cout << "Random: " << list4 << endl;
-    //Удаление узлов
-    //list1.delete_node(2);
-    cout << "Delete Nodes from first: " << list1 << endl;
-    //Удаление из начала
+    cout << "Random: " << list4 << endl << endl;
     cout << "Remove from the head: " << endl;
     list4.pop_head();
     cout << "First: " << list4 << endl;
     list4.pop_head();
     cout << "Second: " << list4 << endl;
     list4.pop_head();
-    cout << "Third: " << list4 << endl;
+    cout << "Third: " << list4 << endl << endl;
+    list1.delete_node(2);
+    cout << "Delete Nodes from first: " << list1 << endl << endl;
     DLinkedList<int> list5(5, 1, 8);
     cout << "Original: " << list5 << endl;
-    //Удаление из конца
     cout << "Remove from the tail: " << endl;
     list5.pop_tail();
     cout << "First: " << list5 << endl;
     list5.pop_tail();
     cout << "Second: " << list5 << endl;
     list5.pop_tail();
-    cout << "Third: " << list5 << endl;
+    cout << "Third: " << list5 << endl << endl;
+    cout << "First list: " << list1 << endl;
+    cout << "First index of first list: " << list1[0] << endl;
+    list1[2] = 10;
+    cout << "Changed third index of first list: " << list1[2] << endl;
+    cout << "First list: " << list1 << endl << endl;
+    DLinkedList<int> list6(4, 1, 7);
+    cout << "Another list: " << list6 << endl;
+    list1.push_head(list6);
+    cout << "First list with another in head: " << list1 << endl;
+    cout << "Second list: " << list2 << endl;
+    list2.push_tail(list6);
+    cout << "Second list with another in tail: " << list2 << endl << endl;
     return 0;
 }
