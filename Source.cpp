@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <random>
 
 using namespace std;
 
@@ -30,11 +31,25 @@ public:
             current = current->next;
         }
     }
-
+    T generateRandom()
+    {
+        random_device randomDevice;
+        mt19937_64 generator(randomDevice());
+        if constexpr (numeric_limits<T>::is_integer)
+        {
+            uniform_int_distribution<T> dice(-10, 10);
+            return dice(generator);
+        }
+        else
+        {
+            uniform_real_distribution<T> dice(-10.0, 10.0);
+            return dice(generator);
+        }
+    }
     DLinkedList(int size, const T& min, const T& max) : _head(nullptr), _tail(nullptr) {
         srand(time(0));
         for (int i = 0; i < size; ++i) {
-            T value = rand() % (max - min + 1) + min;
+            T value = generateRandom();
             push_tail(value);
         }
     }
@@ -99,11 +114,12 @@ public:
     }
 
     void push_head(const DLinkedList& other) {
-        Node<T>* current = other._head;
-        while (current != other._tail) {
+        Node<T>* current = other._tail;
+        while (current != other._head) {
             push_head(current->data);
-            current = current->next;
+            current = current->prev;
         }
+        push_head(other._head->data);
     }
 
     void pop_head() {
@@ -228,7 +244,7 @@ int main() {
     list4.pop_head();
     cout << "Third: " << list4 << endl << endl;
     list1.delete_node(2);
-    cout << "Delete Nodes from first: " << list1 << endl << endl;
+    cout << "Delete Nodes from first(2): " << list1 << endl << endl;
     DLinkedList<int> list5(5, 1, 8);
     cout << "Original: " << list5 << endl;
     cout << "Remove from the tail: " << endl;
@@ -250,5 +266,53 @@ int main() {
     cout << "Second list: " << list2 << endl;
     list2.push_tail(list6);
     cout << "Second list with another in tail: " << list2 << endl << endl;
+    cout << endl << endl << "floating point numbers:" << endl;
+    //////////////////////////////////////////////////////////////////////
+    DLinkedList<double> dlist1;
+    dlist1.push_tail(1.5);
+    dlist1.push_tail(2.2);
+    dlist1.push_tail(2.3);
+    dlist1.push_tail(8.4);
+    dlist1.push_tail(2.5);
+    dlist1.push_head(4.7);
+    dlist1.push_head(5.1);
+    DLinkedList<double> dlist2 = dlist1;
+    DLinkedList<double> dlist3(dlist1);
+    dlist3 = dlist2;
+    DLinkedList<double> dlist4(5, 1.0, 10.0);
+    cout << "First list: " << dlist1 << endl;
+    cout << "Assignment: " << dlist2 << endl;
+    cout << "Copying: " << dlist3 << endl;
+    cout << "Random: " << dlist4 << endl << endl;
+    cout << "Remove from the head: " << endl;
+    dlist4.pop_head();
+    cout << "First: " << dlist4 << endl;
+    dlist4.pop_head();
+    cout << "Second: " << dlist4 << endl;
+    dlist4.pop_head();
+    cout << "Third: " << dlist4 << endl << endl;
+    dlist1.delete_node(2.3);
+    cout << "Delete Nodes from first(2.3): " << dlist1 << endl << endl;
+    DLinkedList<double> dlist5(5, 1.0, 8.0);
+    cout << "Original: " << dlist5 << endl;
+    cout << "Remove from the tail: " << endl;
+    dlist5.pop_tail();
+    cout << "First: " << dlist5 << endl;
+    dlist5.pop_tail();
+    cout << "Second: " << dlist5 << endl;
+    dlist5.pop_tail();
+    cout << "Third: " << dlist5 << endl << endl;
+    cout << "First list: " << dlist1 << endl;
+    cout << "First index of first list: " << dlist1[0] << endl;
+    dlist1[2] = 10.5;
+    cout << "Changed third index of first list: " << dlist1[2] << endl;
+    cout << "First list: " << dlist1 << endl << endl;
+    DLinkedList<double> dlist6(4, 1.0, 7.0);
+    cout << "Another list: " << dlist6 << endl;
+    dlist1.push_head(dlist6);
+    cout << "First list with another in head: " << dlist1 << endl;
+    cout << "Second list: " << dlist2 << endl;
+    dlist2.push_tail(dlist6);
+    cout << "Second list with another in tail: " << dlist2 << endl << endl;
     return 0;
 }
