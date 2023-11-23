@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 #include <random>
 
 using namespace std;
@@ -30,10 +29,8 @@ public:
             current = current->next;
         }
     }
-    T generateRandom()
+    T generateRandom(mt19937_64 generator)
     {
-        random_device randomDevice;
-        mt19937_64 generator(randomDevice());
         if constexpr (numeric_limits<T>::is_integer)
         {
             uniform_int_distribution<T> dice(-10, 10);
@@ -46,9 +43,10 @@ public:
         }
     }
     DLinkedList(int size, const T& min, const T& max) : _head(nullptr), _tail(nullptr) {
-        srand(time(0));
+        random_device randomDevice;
+        mt19937_64 generator(randomDevice());
         for (int i = 0; i < size; ++i) {
-            T value = generateRandom();
+            T value = generateRandom(generator);
             push_tail(value,i);
         }
     }
@@ -89,6 +87,9 @@ public:
     }
 
     void push_tail(const DLinkedList& other) {
+        if (!other._head) {
+            throw length_error("List is empty");
+        }
         Node* current = other._head;
         while (current != other._tail) {
             push_tail(current->data, current->index);
@@ -113,6 +114,9 @@ public:
     }
 
     void push_head(const DLinkedList& other) {
+        if (!other._head) {
+            throw length_error("List is empty");
+        }
         Node* current = other._tail;
         while (current != other._head) {
             push_head(current->data, current->index);
@@ -203,6 +207,9 @@ public:
         return tmp->data;
     }
     size_t get_size() {
+        if (!_head) {
+            throw length_error("List is empty");
+        }
         size_t size = 1;
         _head = _head->next;
         while (_head != _tail) {
@@ -212,6 +219,9 @@ public:
         return size;
     }
     int get_index(int index) {
+        if (!_head) {
+            throw length_error("List is empty");
+        }
         Node* tmp = _head;
         for (int i = 0; i < index; ++i, tmp = tmp->next);
         return tmp->index;
